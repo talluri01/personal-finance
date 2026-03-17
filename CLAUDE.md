@@ -2,6 +2,21 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Git workflow
+
+After completing any meaningful piece of work, commit and push immediately so progress is never lost:
+
+```bash
+git add <files>
+git commit -m "short, descriptive message"
+git push
+```
+
+Commit message conventions:
+- Use imperative mood: "Add summary tab" not "Added summary tab"
+- Scope to what changed: one feature or fix per commit
+- Never batch unrelated changes into a single commit
+
 ## Commands
 
 ```bash
