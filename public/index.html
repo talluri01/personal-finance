@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Personal Finance</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f4f6f9;
+      color: #1a1a2e;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #1a1a2e;
+      color: #fff;
+      padding: 1rem 1.5rem 0;
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 0.75rem;
+    }
+
+    header h1 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    /* ── Nav tabs ── */
+    nav {
+      display: flex;
+      gap: 0.25rem;
+    }
+
+    .nav-tab {
+      padding: 0.5rem 1.1rem;
+      border: none;
+      background: none;
+      color: rgba(255,255,255,0.55);
+      font-size: 0.88rem;
+      font-weight: 500;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .nav-tab:hover { color: rgba(255,255,255,0.85); }
+
+    .nav-tab.active {
+      color: #fff;
+      border-bottom-color: #4f7df3;
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      margin-bottom: 1.5rem;
+    }
+
+    .card h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 1.25rem;
+      color: #1a1a2e;
+    }
+
+    /* ── Form ── */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      margin-bottom: 0.75rem;
+    }
+
+    label {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #555;
+    }
+
+    input, select, textarea {
+      border: 1px solid #dde1e9;
+      border-radius: 6px;
+      padding: 0.5rem 0.65rem;
+      font-size: 0.9rem;
+      color: #1a1a2e;
+      background: #fff;
+      width: 100%;
+      transition: border-color 0.15s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #4f7df3;
+    }
+
+    textarea { resize: vertical; min-height: 60px; }
+
+    .btn {
+      display: inline-block;
+      padding: 0.55rem 1.25rem;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+
+    .btn:hover { opacity: 0.88; }
+
+    .btn-primary {
+      background: #4f7df3;
+      color: #fff;
+      width: 100%;
+      padding: 0.65rem;
+      margin-top: 0.5rem;
+    }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      background: #2ecc71;
+      color: #fff;
+      padding: 0.65rem 1.1rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none;
+    }
+
+    #toast.show { opacity: 1; transform: translateY(0); }
+
+    /* ── Transaction List ── */
+    .tx-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .tx-item {
+      display: grid;
+      grid-template-columns: 6rem 1fr auto auto;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #f0f2f6;
+    }
+
+    .tx-item:last-child { border-bottom: none; }
+
+    .tx-date {
+      font-size: 0.78rem;
+      color: #888;
+      white-space: nowrap;
+    }
+
+    .tx-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .tx-category {
+      font-size: 0.88rem;
+      font-weight: 500;
+    }
+
+    .tx-note {
+      font-size: 0.78rem;
+      color: #888;
+    }
+
+    .tx-amount {
+      font-size: 0.95rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .tx-amount.income  { color: #27ae60; }
+    .tx-amount.expense { color: #e74c3c; }
+
+    .tx-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+    }
+
+    .tx-header h2 { margin-bottom: 0; }
+
+    #filterCategory {
+      width: auto;
+      font-size: 0.82rem;
+      padding: 0.35rem 0.6rem;
+      color: #555;
+    }
+
+    .tx-empty {
+      text-align: center;
+      color: #aaa;
+      font-size: 0.88rem;
+      padding: 1.5rem 0;
+    }
+
+    .btn-delete {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #ccc;
+      font-size: 1.1rem;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      line-height: 1;
+      transition: color 0.15s, background 0.15s;
+    }
+
+    .btn-delete:hover { color: #e74c3c; background: #fdf0ef; }
+
+    /* ── Monthly Summary ── */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+
+    .summary-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .summary-label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .summary-value {
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+
+    .summary-value.income   { color: #27ae60; }
+    .summary-value.expense  { color: #e74c3c; }
+    .summary-value.positive { color: #27ae60; }
+    .summary-value.negative { color: #e74c3c; }
+    .summary-value.neutral  { color: #1a1a2e; }
+
+    .summary-month {
+      font-size: 0.8rem;
+      color: #aaa;
+      margin-bottom: 1rem;
+    }
+
+    @media (max-width: 480px) {
+      .form-row { grid-template-columns: 1fr; }
+      .tx-item  { grid-template-columns: 5rem 1fr auto auto; }
+      .summary-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <h1>Personal Finance</h1>
+  </div>
+  <nav>
+    <button class="nav-tab active" data-tab="summary">Summary</button>
+    <button class="nav-tab" data-tab="transactions">Transactions</button>
+  </nav>
+</header>
+
+<div class="container">
+
+  <!-- Summary tab -->
+  <div data-section="summary">
+  <div class="card">
+    <h2>Monthly Summary</h2>
+    <div id="summaryMonth" class="summary-month"></div>
+    <div class="summary-grid">
+      <div class="summary-item">
+        <span class="summary-label">Income</span>
+        <span id="sumIncome" class="summary-value income">$0.00</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Expenses</span>
+        <span id="sumExpense" class="summary-value expense">$0.00</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Balance</span>
+        <span id="sumBalance" class="summary-value neutral">$0.00</span>
+      </div>
+    </div>
+  </div>
+  </div><!-- /summary section -->
+
+  <!-- Transactions tab -->
+  <div data-section="transactions" style="display:none">
+  <!-- Transaction List -->
+  <div class="card">
+    <div class="tx-header">
+      <h2>Transactions</h2>
+      <select id="filterCategory">
+        <option value="">All Categories</option>
+      </select>
+    </div>
+    <div id="txList"><p class="tx-empty">No transactions yet.</p></div>
+  </div>
+
+  <!-- Add Transaction -->
+  <div class="card">
+    <h2>Add Transaction</h2>
+    <form id="txForm">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="type">Type</label>
+          <select id="type" required>
+            <option value="expense">Expense</option>
+            <option value="income">Income</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="amount">Amount ($)</label>
+          <input type="number" id="amount" placeholder="0.00" min="0.01" step="0.01" required />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="category">Category</label>
+          <select id="category" required></select>
+        </div>
+        <div class="form-group">
+          <label for="date">Date</label>
+          <input type="date" id="date" required />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="note">Note (optional)</label>
+        <textarea id="note" placeholder="What was this for?"></textarea>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Add Transaction</button>
+    </form>
+  </div>
+  </div><!-- /transactions section -->
+
+</div>
+
+<div id="toast"></div>
+
+<script>
+  const CATEGORIES = {
+    expense: ["Rent", "Food", "Transport", "Entertainment", "Health", "Utilities", "Other"],
+    income:  ["Salary", "Freelance", "Other Income"]
+  };
+
+  // ── Toast ─────────────────────────────────────────────────────────────
+  function showToast(msg) {
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    setTimeout(() => t.classList.remove("show"), 2200);
+  }
+
+  // ── Category dropdown ─────────────────────────────────────────────────
+  function populateCategories(type) {
+    const sel = document.getElementById("category");
+    sel.innerHTML = CATEGORIES[type].map(c => `<option value="${c}">${c}</option>`).join("");
+  }
+
+  document.getElementById("type").addEventListener("change", e => populateCategories(e.target.value));
+
+  // ── Default date ──────────────────────────────────────────────────────
+  document.getElementById("date").value = new Date().toISOString().slice(0, 10);
+
+  // ── API helpers ───────────────────────────────────────────────────────
+  async function fetchTransactions() {
+    const res = await fetch("/api/transactions");
+    return res.json();
+  }
+
+  async function addTransaction(tx) {
+    await fetch("/api/transactions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(tx)
+    });
+  }
+
+  async function deleteTransaction(id) {
+    await fetch(`/api/transactions/${id}`, { method: "DELETE" });
+  }
+
+  // ── Render helpers ────────────────────────────────────────────────────
+  function formatDate(iso) {
+    const [y, m, d] = iso.split("-");
+    return new Date(y, m - 1, d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  }
+
+  // ── Filter dropdown ───────────────────────────────────────────────────
+  const ALL_CATEGORIES = [
+    ...CATEGORIES.expense,
+    ...CATEGORIES.income
+  ].sort();
+
+  const filterEl = document.getElementById("filterCategory");
+  filterEl.innerHTML = '<option value="">All Categories</option>' +
+    ALL_CATEGORIES.map(c => `<option value="${c}">${c}</option>`).join("");
+
+  filterEl.addEventListener("change", () => renderList(window._allTransactions || []));
+
+  function renderList(list) {
+    window._allTransactions = list;
+    const selected = filterEl.value;
+    const filtered = selected ? list.filter(tx => tx.category === selected) : list;
+    const container = document.getElementById("txList");
+    if (filtered.length === 0) {
+      container.innerHTML = selected
+        ? `<p class="tx-empty">No transactions in <strong>${selected}</strong>.</p>`
+        : '<p class="tx-empty">No transactions yet.</p>';
+      return;
+    }
+    container.innerHTML = '<div class="tx-list">' + filtered.map(tx => `
+      <div class="tx-item">
+        <span class="tx-date">${formatDate(tx.date)}</span>
+        <div class="tx-meta">
+          <span class="tx-category">${tx.category}</span>
+          ${tx.note ? `<span class="tx-note">${tx.note}</span>` : ""}
+        </div>
+        <span class="tx-amount ${tx.type}">
+          ${tx.type === "income" ? "+" : "−"}$${Number(tx.amount).toFixed(2)}
+        </span>
+        <button class="btn-delete" data-id="${tx.id}" title="Delete">&#x2715;</button>
+      </div>
+    `).join("") + "</div>";
+  }
+
+  function renderSummary(list) {
+    const now   = new Date();
+    const month = now.getMonth();
+    const year  = now.getFullYear();
+
+    document.getElementById("summaryMonth").textContent =
+      now.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+
+    const thisMonth = list.filter(tx => {
+      const [y, m] = tx.date.split("-").map(Number);
+      return y === year && m - 1 === month;
+    });
+
+    const income  = thisMonth.filter(t => t.type === "income").reduce((s, t) => s + Number(t.amount), 0);
+    const expense = thisMonth.filter(t => t.type === "expense").reduce((s, t) => s + Number(t.amount), 0);
+    const balance = income - expense;
+
+    document.getElementById("sumIncome").textContent  = `$${income.toFixed(2)}`;
+    document.getElementById("sumExpense").textContent = `$${expense.toFixed(2)}`;
+
+    const balEl = document.getElementById("sumBalance");
+    balEl.textContent = `${balance < 0 ? "−" : ""}$${Math.abs(balance).toFixed(2)}`;
+    balEl.className   = "summary-value " + (balance > 0 ? "positive" : balance < 0 ? "negative" : "neutral");
+  }
+
+  async function refresh() {
+    const list = await fetchTransactions();
+    renderSummary(list);
+    renderList(list);
+  }
+
+  // ── Form submit ───────────────────────────────────────────────────────
+  document.getElementById("txForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const tx = {
+      id:       crypto.randomUUID(),
+      type:     document.getElementById("type").value,
+      amount:   parseFloat(document.getElementById("amount").value),
+      category: document.getElementById("category").value,
+      date:     document.getElementById("date").value,
+      note:     document.getElementById("note").value.trim()
+    };
+    await addTransaction(tx);
+    showToast("Transaction saved!");
+    document.getElementById("amount").value = "";
+    document.getElementById("note").value   = "";
+    document.getElementById("amount").focus();
+    refresh();
+  });
+
+  // ── Delete ────────────────────────────────────────────────────────────
+  document.getElementById("txList").addEventListener("click", async function(e) {
+    const btn = e.target.closest(".btn-delete");
+    if (!btn) return;
+    await deleteTransaction(btn.dataset.id);
+    showToast("Transaction deleted.");
+    refresh();
+  });
+
+  // ── Tab navigation ────────────────────────────────────────────────────
+  document.querySelectorAll(".nav-tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      const target = tab.dataset.tab;
+      document.querySelectorAll(".nav-tab").forEach(t => t.classList.toggle("active", t === tab));
+      document.querySelectorAll("[data-section]").forEach(s => {
+        s.style.display = s.dataset.section === target ? "" : "none";
+      });
+    });
+  });
+
+  // ── Init ─────────────────────────────────────────────────────────────
+  populateCategories(document.getElementById("type").value);
+  refresh();
+</script>
+
+</body>
+</html>
