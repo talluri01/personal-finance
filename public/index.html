@@ -409,19 +409,28 @@
   // ── API helpers ───────────────────────────────────────────────────────
   async function fetchTransactions() {
     const res = await fetch("/api/transactions");
+    if (!res.ok) throw new Error(`Failed to load transactions (${res.status})`);
     return res.json();
   }
 
   async function addTransaction(tx) {
-    await fetch("/api/transactions", {
+    const res = await fetch("/api/transactions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(tx)
     });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || `Save failed (${res.status})`);
+    }
   }
 
   async function deleteTransaction(id) {
-    await fetch(`/api/transactions/${id}`, { method: "DELETE" });
+    const res = await fetch(`/api/transactions/${id}`, { method: "DELETE" });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || `Delete failed (${res.status})`);
+    }
   }
 
   // ── Render helpers ────────────────────────────────────────────────────
@@ -494,9 +503,13 @@
   }
 
   async function refresh() {
-    const list = await fetchTransactions();
-    renderSummary(list);
-    renderList(list);
+    try {
+      const list = await fetchTransactions();
+      renderSummary(list);
+      renderList(list);
+    } catch (err) {
+      showToast("Error: " + err.message);
+    }
   }
 
   // ── Form submit ───────────────────────────────────────────────────────
@@ -510,21 +523,31 @@
       date:     document.getElementById("date").value,
       note:     document.getElementById("note").value.trim()
     };
-    await addTransaction(tx);
+    try {
+      await addTransaction(tx);
+    } catch (err) {
+      showToast("Error: " + err.message);
+      return;
+    }
     showToast("Transaction saved!");
     document.getElementById("amount").value = "";
     document.getElementById("note").value   = "";
     document.getElementById("amount").focus();
-    refresh();
+    await refresh();
   });
 
   // ── Delete ────────────────────────────────────────────────────────────
   document.getElementById("txList").addEventListener("click", async function(e) {
     const btn = e.target.closest(".btn-delete");
     if (!btn) return;
-    await deleteTransaction(btn.dataset.id);
+    try {
+      await deleteTransaction(btn.dataset.id);
+    } catch (err) {
+      showToast("Error: " + err.message);
+      return;
+    }
     showToast("Transaction deleted.");
-    refresh();
+    await refresh();
   });
 
   // ── Tab navigation ────────────────────────────────────────────────────

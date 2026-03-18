@@ -37,9 +37,13 @@ app.post("/api/transactions", (req, res) => {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
-  db.prepare(
-    "INSERT INTO transactions (id, type, amount, category, date, note) VALUES (?, ?, ?, ?, ?, ?)"
-  ).run(id, type, amount, category, date, note ?? "");
+  try {
+    db.prepare(
+      "INSERT INTO transactions (id, type, amount, category, date, note) VALUES (?, ?, ?, ?, ?, ?)"
+    ).run(id, type, amount, category, date, note ?? "");
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
 
   res.status(201).json({ ok: true });
 });
