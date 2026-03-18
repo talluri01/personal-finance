@@ -282,10 +282,73 @@
       margin-bottom: 1rem;
     }
 
+    /* ── Home tab ── */
+    .home-hero {
+      text-align: center;
+      padding: 1.5rem 0 1rem;
+    }
+
+    .home-hero h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: #1a1a2e;
+    }
+
+    .home-hero p {
+      font-size: 0.95rem;
+      color: #666;
+      max-width: 480px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .home-features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .home-feature {
+      background: #f8f9fc;
+      border-radius: 8px;
+      padding: 1.1rem 1rem;
+    }
+
+    .home-feature-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .home-feature h3 {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #1a1a2e;
+      margin-bottom: 0.3rem;
+    }
+
+    .home-feature p {
+      font-size: 0.8rem;
+      color: #888;
+      line-height: 1.5;
+    }
+
+    .home-cta {
+      text-align: center;
+      margin-top: 1.5rem;
+    }
+
+    .home-cta p {
+      font-size: 0.82rem;
+      color: #aaa;
+    }
+
     @media (max-width: 480px) {
       .form-row { grid-template-columns: 1fr; }
       .tx-item  { grid-template-columns: 5rem 1fr auto auto; }
       .summary-grid { grid-template-columns: 1fr; }
+      .home-features { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -296,15 +359,46 @@
     <h1>Personal Finance</h1>
   </div>
   <nav>
-    <button class="nav-tab active" data-tab="summary">Summary</button>
+    <button class="nav-tab active" data-tab="home">Home</button>
+    <button class="nav-tab" data-tab="summary">Summary</button>
     <button class="nav-tab" data-tab="transactions">Transactions</button>
   </nav>
 </header>
 
 <div class="container">
 
+  <!-- Home tab -->
+  <div data-section="home">
+  <div class="card">
+    <div class="home-hero">
+      <h2>Your Personal Finance Tracker</h2>
+      <p>A simple, private tool for tracking where your money comes from and where it goes. Everything stays on your machine — no accounts, no cloud, no subscriptions.</p>
+    </div>
+    <div class="home-features">
+      <div class="home-feature">
+        <div class="home-feature-icon">💸</div>
+        <h3>Log Transactions</h3>
+        <p>Record income and expenses with a category, date, and optional note in seconds.</p>
+      </div>
+      <div class="home-feature">
+        <div class="home-feature-icon">📊</div>
+        <h3>Monthly Summary</h3>
+        <p>See your total income, expenses, and net balance for the current month at a glance.</p>
+      </div>
+      <div class="home-feature">
+        <div class="home-feature-icon">🔍</div>
+        <h3>Filter &amp; Review</h3>
+        <p>Browse your full transaction history and filter by category to spot spending patterns.</p>
+      </div>
+    </div>
+    <div class="home-cta">
+      <p>Head to <strong>Summary</strong> for this month's overview, or <strong>Transactions</strong> to add an entry.</p>
+    </div>
+  </div>
+  </div><!-- /home section -->
+
   <!-- Summary tab -->
-  <div data-section="summary">
+  <div data-section="summary" style="display:none">
   <div class="card">
     <h2>Monthly Summary</h2>
     <div id="summaryMonth" class="summary-month"></div>
