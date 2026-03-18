@@ -344,6 +344,23 @@
       color: #aaa;
     }
 
+    .home-cta a {
+      color: #4f7df3;
+      text-decoration: none;
+    }
+
+    .home-cta a:hover { text-decoration: underline; }
+
+    .home-feature-link {
+      cursor: pointer;
+      transition: box-shadow 0.15s, transform 0.15s;
+    }
+
+    .home-feature-link:hover {
+      box-shadow: 0 2px 8px rgba(79,125,243,0.15);
+      transform: translateY(-2px);
+    }
+
     @media (max-width: 480px) {
       .form-row { grid-template-columns: 1fr; }
       .tx-item  { grid-template-columns: 5rem 1fr auto auto; }
@@ -375,7 +392,7 @@
       <p>A simple, private tool for tracking where your money comes from and where it goes. Everything stays on your machine — no accounts, no cloud, no subscriptions.</p>
     </div>
     <div class="home-features">
-      <div class="home-feature">
+      <div class="home-feature home-feature-link" data-nav="transactions" role="button" tabindex="0">
         <div class="home-feature-icon">💸</div>
         <h3>Log Transactions</h3>
         <p>Record income and expenses with a category, date, and optional note in seconds.</p>
@@ -392,7 +409,7 @@
       </div>
     </div>
     <div class="home-cta">
-      <p>Head to <strong>Summary</strong> for this month's overview, or <strong>Transactions</strong> to add an entry.</p>
+      <p>Head to <strong>Summary</strong> for this month's overview, or <strong><a href="#" data-nav="transactions">Transactions</a></strong> to add an entry.</p>
     </div>
   </div>
   </div><!-- /home section -->
@@ -645,14 +662,31 @@
   });
 
   // ── Tab navigation ────────────────────────────────────────────────────
-  document.querySelectorAll(".nav-tab").forEach(tab => {
-    tab.addEventListener("click", () => {
-      const target = tab.dataset.tab;
-      document.querySelectorAll(".nav-tab").forEach(t => t.classList.toggle("active", t === tab));
-      document.querySelectorAll("[data-section]").forEach(s => {
-        s.style.display = s.dataset.section === target ? "" : "none";
-      });
+  function switchTab(target) {
+    document.querySelectorAll(".nav-tab").forEach(t => t.classList.toggle("active", t.dataset.tab === target));
+    document.querySelectorAll("[data-section]").forEach(s => {
+      s.style.display = s.dataset.section === target ? "" : "none";
     });
+  }
+
+  document.querySelectorAll(".nav-tab").forEach(tab => {
+    tab.addEventListener("click", () => switchTab(tab.dataset.tab));
+  });
+
+  // Allow data-nav elements (home tab links/cards) to switch tabs
+  document.addEventListener("click", e => {
+    const el = e.target.closest("[data-nav]");
+    if (!el) return;
+    e.preventDefault();
+    switchTab(el.dataset.nav);
+  });
+
+  document.addEventListener("keydown", e => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    const el = e.target.closest("[data-nav]");
+    if (!el) return;
+    e.preventDefault();
+    switchTab(el.dataset.nav);
   });
 
   // ── Init ─────────────────────────────────────────────────────────────
